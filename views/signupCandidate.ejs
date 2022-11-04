@@ -96,33 +96,76 @@
             <h2>Innovating Democracy</h2>
           </div>
           <div class="d-none d-xl-block">
-            <img class="" src="../images/vote.gif" alt="" srcset="" />
+            <img class="" src="../images/Login.gif" alt="" srcset="" />
           </div>
         </div>
       </div>
 
       <div class="sct login">
-        <form action="/login" method="POST">
-          <h3>Login as Voter</h3>
+        <form action="/register-candidate" method="POST">
+          <h3>Signup/Register</h3>
+          <% if(message.length>0){ %>
+          <div class="alert alert-success"><%= message %></div>
+          <% } %>
+          <input required type="name" name="name" placeholder="Name" />
           <input
+            required
+            type="number"
+            name="regno"
+            placeholder="Registration No."
+          />
+          <select required class="year" name="year" id="">
+            <option value="" disabled selected>Year</option>
+            <option value="1st">1st</option>
+            <option value="2nd">2nd</option>
+            <option value="3rd">3rd</option>
+          </select>
+          <select required class="year" name="branch" id="">
+            <option value="" disabled selected>Branch</option>
+            <option value="CSE">CSE</option>
+            <option value="IT">IT</option>
+            <option value="CCE">CCE</option>
+          </select>
+
+          <input
+            maxlength="1"
+            style="text-transform: capitalize"
+            required
+            type="text"
+            name="section"
+            placeholder="Section"
+          />
+
+          <input
+            required
             class="year"
             type="email"
             name="email"
-            placeholder="College Email"
+            placeholder="College email"
           />
-          <input type="password" name="password" placeholder="Password" />
-          <!-- <input type="phone" name="phone" placeholder="Enter Phone Number"> -->
+
+          <input
+            required
+            class="year"
+            min="0"
+            max="10"
+            type="number"
+            name="cgpa"
+            placeholder="CGPA"
+          />
+
+          <input
+            required
+            class="year"
+            min="0"
+            max="5"
+            type="number"
+            name="blackdot"
+            placeholder="Number of Black Dots received"
+          />
           <div class="forgot-remember">
-            <label class="control control-checkbox">
-              Remember me
-              <input type="checkbox" />
-              <div class="control_indicator"></div>
-            </label>
-            <div class="forgot">
-              <a href="#">Forgot Password?</a>
-            </div>
           </div>
-          <input type="submit" name="Login" value="Login" />
+          <input type="submit" name="Register" value="Register Candidate" />
         </form>
       </div>
       <!--end login-->
