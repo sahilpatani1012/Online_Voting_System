@@ -20,11 +20,14 @@ import {
   query,
   where,
   updateDoc,
+  setDoc,
+  getFirestore,
 } from "firebase/firestore";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import flash from "connect-flash";
 import session from "express-session";
+const db = getFirestore(application);
 
 //Necessary inclusions ---------------------------------------------------
 const __filename = fileURLToPath(import.meta.url);
@@ -68,13 +71,73 @@ app.post("/login", function (req, res) {
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       const user = userCredential.user;
-      res.send("Login Successful");
+      res.redirect("/voter-dashboard");
     })
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
       res.send("Login unsuccessful");
     });
+});
+
+app.get("/voter-dashboard", async (req, res) => {
+  const currentUser = auth.currentUser;
+  if (currentUser === null) {
+    res.redirect("/login");
+    return;
+  }
+  let voterInfo = [];
+  const email = currentUser.email;
+  let q = query(Voters, where("email", "==", email));
+  let querySnap = await getDocs(q);
+  querySnap.forEach((docFile) => {
+    voterInfo.push(docFile.data());
+  });
+  let year = voterInfo[0].year;
+  let section = voterInfo[0].section;
+  let candidatesList = [];
+  q = query(
+    Candidates,
+    where("year", "==", year),
+    where("section", "==", section)
+  );
+  querySnap = await getDocs(q);
+  querySnap.forEach((docFile) => {
+    candidatesList.push(docFile.data());
+  });
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      res.render("voterDashboard", {
+        candidatesList: candidatesList,
+        message: req.flash("message"),
+      });
+    } else {
+      res.redirect("/login");
+    }
+  });
+});
+
+app.post("/voter-dashboard", async (req, res) => {
+  const candidateID = req.body.candidateID;
+  let candidateInfo = [];
+  let currVotes;
+  let q = query(Candidates, where("regno", "==", candidateID));
+  let querySnap = await getDocs(q);
+  querySnap.forEach((docFile) => {
+    candidateInfo.push(docFile.data());
+  });
+  console.log(candidateInfo);
+  currVotes = candidateInfo[0].votes;
+  currVotes += 1;
+  setDoc(
+    doc(database, "Candidates", candidateID),
+    {
+      votes: currVotes,
+    },
+    { merge: true }
+  );
+  req.flash("message", "Thanks for voting!");
+  res.redirect("/voter-dashboard");
 });
 
 app.get("/", (req, res) => {
@@ -104,10 +167,11 @@ app.get("/register-candidate", (req, res) => {
 app.post("/register-candidate", (req, res) => {
   const email = req.body.email;
   let section = req.body.section;
+  const regno = req.body.regno;
   section = section.toUpperCase();
   const candidate = {
     name: req.body.name,
-    regno: req.body.regno,
+    regno: regno,
     year: req.body.year,
     branch: req.body.branch,
     section: section,
@@ -115,22 +179,12 @@ app.post("/register-candidate", (req, res) => {
     status: "candidate",
     cgpa: req.body.cgpa,
     blackdots: req.body.blackdot,
+    votes: 0,
   };
-  //   createUserWithEmailAndPassword(auth, email, password)
-  //     .then((userCredential) => {
-  //       const user = userCredential.user;
-  //     })
-  //     .catch((error) => {
-  //       const errorCode = error.code;
-  //       const errorMessage = error.message;
-  //     });
-  addDoc(Candidates, candidate).then(() => {
-    req.flash(
-      "message",
-      "You have been registered as a Candidate successfully!"
-    );
-    res.redirect("/register-candidate");
-  });
+
+  setDoc(doc(database, "Candidates", regno), candidate);
+  req.flash("message", "You have been registered as a Candidate successfully!");
+  res.redirect("/register-candidate");
 });
 
 app.get("/register-voter", (req, res) => {
@@ -140,6 +194,14 @@ app.get("/register-voter", (req, res) => {
 app.post("/register-voter", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+    });
   let section = req.body.section;
   section = section.toUpperCase();
   const voter = {
@@ -150,15 +212,8 @@ app.post("/register-voter", (req, res) => {
     status: "voter",
     section: section,
     email: req.body.email,
+    votingStatus: false,
   };
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-    });
   addDoc(Voters, voter).then(() => {
     req.flash("message", "You have been registered as a Voter successfully!");
     res.redirect("/register-voter");
