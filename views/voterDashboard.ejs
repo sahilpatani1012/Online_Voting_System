@@ -33,55 +33,25 @@
             </p>
         </div>
         <% } %>
-            <!-- <table class="table">
-                <thead>
-                    <th>Name</th>
-                    <th>Registration No.</th>
-                    <th>Year</th>
-                    <th>Section</th>
-                    <th>Vote</th>
-                </thead>
-                <tbody>
-                    <form action="/voter-dashboard" method="post">
-                        <% for(let i=0;i<candidatesList.length;i++){ %>
-                            <tr>
-                                <td>
-                                    <%= candidatesList[i].name %>
-                                </td>
-                                <td><input name="candidateID" disabled type="text" value=<%=candidatesList[i].regno %>>
-                                </td>
-                                <td>
-                                    <%= candidatesList[i].year %> <%= candidatesList[i].branch %> 
-                                </td>
-                                <td>
-                                    <%= candidatesList[i].section %>
-                                </td>
-                                <td> <button type="submit">Vote</button></td>
-                            </tr>
-                            <% } %>
-                    </form>
-                </tbody>
-            </table> -->
             <% for(let i=0;i<candidatesList.length;i++){ %>
                 <form action="/voter-dashboard" method="post">
-                <div class="card" style="width: 18rem;">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <%= candidatesList[i].name %>
-                        </h5>
-                        <h6 class="card-subtitle mb-2 text-muted"><input name="candidateID" readonly type="text"
-                                value=<%=candidatesList[i].regno %>></h6>
-                        <h6 class="card-subtitle mb-2 text-muted"><input name="lol" type="text"></h6>
-                        <p class="card-text">
-                            <%= candidatesList[i].year %> Year <%= candidatesList[i].branch %> 
-                        </p>
-                        <p class="card-text">
-                           Section - <%= candidatesList[i].section %>
-                        </p>
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= candidatesList[i].name %>
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-muted"><input name="candidateID" readonly type="text"
+                                    value=<%=candidatesList[i].regno %>></h6>
+                            <p class="card-text">
+                                <%= candidatesList[i].year %> Year <%= candidatesList[i].branch %>
+                            </p>
+                            <p class="card-text">
+                                Section - <%= candidatesList[i].section %>
+                            </p>
+                        </div>
+                        <button type="submit">Vote</button>
                     </div>
-                    <button type="submit">Vote</button>
-                </div>
-            </form>
+                </form>
                 <% } %>
 
 

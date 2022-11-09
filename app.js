@@ -126,7 +126,7 @@ app.post("/voter-dashboard", async (req, res) => {
   querySnap.forEach((docFile) => {
     candidateInfo.push(docFile.data());
   });
-  console.log(candidateInfo);
+  // console.log(candidateInfo);
   currVotes = candidateInfo[0].votes;
   currVotes += 1;
   setDoc(
@@ -149,7 +149,27 @@ app.get("/vote", (req, res) => {
 });
 
 app.get("/results", (req, res) => {
-  res.render("statistics", { page: "statistics" });
+  res.render("statistics");
+});
+
+app.post("/results", async (req, res) => {
+  const year = req.body.year;
+  const branch = req.body.branch;
+  let section = req.body.section;
+  section = section.toUpperCase();
+  let candidatesList = [];
+  let q = query(
+    Candidates,
+    where("year", "==", year),
+    where("branch", "==", branch),
+    where("section", "==", section)
+  );
+  let querySnap = await getDocs(q);
+  querySnap.forEach((docFile) => {
+    candidatesList.push(docFile.data());
+  });
+  candidatesList.sort((a, b) => b.votes - a.votes);
+  res.render("results", { candidatesList: candidatesList });
 });
 
 app.get("/contact", (req, res) => {
